@@ -1,0 +1,70 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+data = {
+    "Intersection": ["Carlsbad Blvd & Redwood Ave", "Carlsbad Blvd & Tamarack Ave",
+                    "Carlsbad Blvd & Sequoia Ave", "Tamarack Ave & Garfield St", "Total"],
+    "Severity": {
+        "Fatal": [0, 0, 0, 0, 0],
+        "Serious Injury": [0, 0, 0, 0, 0],
+        "Other Visible Injury": [0, 4, 1, 0, 5],
+        "Complaint of Pain": [1, 5, 1, 1, 8],
+        "PDO": [2, 2, 1, 0, 5]
+    },
+    "Type": {
+        "Broadside": [0, 1, 0, 1, 2],
+        "Sideswipe": [1, 2, 1, 0, 4],
+        "Rear-End": [1, 5, 2, 0, 8],
+        "Hit Object": [1, 1, 0, 0, 2],
+        "Other": [0, 1, 0, 0, 1],
+        "Not Stated": [0, 1, 0, 0, 1]
+    },
+    "Cause": {
+        "DUI": [0, 3, 0, 0, 3],
+        "Unsafe Speed": [1, 1, 1, 0, 3],
+        "Improper Turning": [1, 1, 1, 0, 3],
+        "Unsafe Start/Backing": [0, 2, 0, 0, 2],
+        "Traffic Signals & Signs": [0, 1, 0, 1, 2]
+    },
+    "Modes of Transportation": [
+        {"Veh/Veh": 2, "Veh/Bik": 0, "Veh/Ped": 0},
+        {"Veh/Veh": 7, "Veh/Bike": 1, "Veh/Ped": 0},
+        {"Veh/Veh": 2, "Veh/Bike": 0, "Veh/Ped": 0},
+        {"Veh/Veh": 1, "Veh/Bike": 0, "Veh/Ped": 0}
+    ]
+}
+
+# Handling "Modes of Transportation" data
+modes_of_transportation_data = {
+    data["Intersection"][index]: data["Modes of Transportation"][index]
+    for index in range(4)
+}
+
+for mode_dict in modes_of_transportation_data.values():
+    try:
+        del mode_dict["intersection"]  # Assuming "intersection" is unwanted
+    except KeyError:
+        pass
+
+modes_of_transportation_df = pd.DataFrame(modes_of_transportation_data.values(),
+                                         columns=["Intersection", "Veh/Veh", "Veh/Bik", "Veh/Ped"])
+
+# Create DataFrames for other categories
+type_df = pd.DataFrame(type_data, columns=["Intersection", "Broadside", "Sideswipe",
+                                          "Rear-End", "Other", "Not Stated"])
+cause_df = pd.DataFrame(cause_data, columns=["Intersection", "DUI", "Unsafe Speed",
+                                            "Improper Turning", "Unsafe Start/Backing",
+                                            "Traffic Signals & Signs"])
+severity_df = pd.DataFrame(severity_data, columns=["Intersection", "Fatal", "Serious Injury",
+                                                 "Other Visible Injury", "Complaint of Pain", "PDO"])
+
+# Create stacked bar plots
+categories = ["Type", "Cause", "Severity", "Modes of Transportation"]
+for category, df in zip(categories, [type_df, cause_df, severity_df, modes_of_transportation_df]):
+    fig, ax = plt.subplots(figsize=(10, 6))
+    df.set_index("Intersection").plot(kind="bar", stacked=True, ax=ax)
+    ax.legend(title=category, loc="upper left", bbox_to_anchor=(1.2, 1))
+    plt.xlabel("Intersection")
+    plt.ylabel("Count")
+    plt.title(f"Number of Crashes by {category} at Each Intersection")
+    plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
